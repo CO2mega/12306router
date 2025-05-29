@@ -15,8 +15,29 @@
         <el-menu-item index="1">首页</el-menu-item>
         <el-sub-menu index="2">
           <template #title>车票</template>
-          <el-menu-item index="2-1">车票</el-menu-item>
-          <el-menu-item index="2-2">常用查询</el-menu-item>
+          <template #default>
+            <div class="submenu-columns">
+              <div class="submenu-col">
+                <div class="submenu-title active">购买</div>
+                <div class="submenu-item">单程</div>
+                <div class="submenu-item">中转换乘</div>
+              </div>
+              <div class="submenu-col">
+                <div class="submenu-title"></div>
+                <div class="submenu-item">往返</div>
+                <div class="submenu-item">计次·定期票</div>
+              </div>
+              <div class="submenu-col">
+                <div class="submenu-title active">变更</div>
+                <div class="submenu-item">退票</div>
+                <div class="submenu-item">变更到站</div>
+              </div>
+              <div class="submenu-col">
+                <div class="submenu-title"></div>
+                <div class="submenu-item">改签</div>
+              </div>
+            </div>
+          </template>
         </el-sub-menu>
       </el-menu>
     </div>
@@ -99,5 +120,48 @@ const gosignup = () => {
 
 .el-button--text {
   color: #fff;
+}
+
+.submenu-columns {
+  display: flex;
+  min-width: 520px;
+  padding: 18px 0 18px 0;
+  background: #fff;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(32, 94, 201, 0.08);
+  border-radius: 6px;
+  gap: 32px;
+  border: none;
+}
+.submenu-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 100px;
+  border-right: 1px solid #e3eefd;
+  padding: 0 24px;
+}
+.submenu-col:last-child {
+  border-right: none;
+}
+.submenu-title {
+  font-weight: 500;
+  color: #1976d2;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+.submenu-title.active {
+  color: #1976d2;
+}
+.submenu-item {
+  color: #333;
+  font-size: 15px;
+  padding: 6px 0;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+.submenu-item:hover {
+  background: #f5f7fa;
+  color: #1976d2;
 }
 </style>
