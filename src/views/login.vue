@@ -33,28 +33,30 @@
 <script setup>
 import Header from "@/components/header.vue";
 import { ref } from "vue";
-import axios from "axios"; // 需先 npm install axios
+import axios from "axios";
+import { useRouter } from "vue-router";
 
 const account = ref("");
 const password = ref("");
-const showReset = ref(false);
-const resetAccount = ref("");
+const user = ref(null); // Store user state globally
+const router = useRouter();
 
 function handleLogin() {
-    axios.post("/api/login", {
+    axios.post("http://localhost:3000/api/login", {
         account: account.value,
         password: password.value
-    }).then(res => {
+    })
+    .then(res => {
         if (res.data.code === 0) {
-            // 登录成功，保存用户信息
+            user.value = res.data.user; // Save user data
             localStorage.setItem("user", JSON.stringify(res.data.user));
             alert("登录成功！");
-            // 可跳转首页或刷新页面
-            window.location.href = "/";
+            router.push("/"); // Redirect to homepage
         } else {
             alert(res.data.msg || "登录失败");
         }
-    }).catch(() => {
+    })
+    .catch(() => {
         alert("网络错误，请稍后重试");
     });
 }
