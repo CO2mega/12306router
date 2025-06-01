@@ -12,6 +12,10 @@
                     <label for="password">密码</label>
                     <input id="password" v-model="password" type="password" required placeholder="请输入密码" />
                 </div>
+                <!-- 添加记住密码选项 -->
+                <div class="remember-me">
+                    <el-checkbox v-model="rememberMe">记住密码</el-checkbox>
+                </div>
                 <div class="form-actions">
                     <button type="submit">登录</button>
                     <button type="button" @click="resetPassword">重置密码</button>
@@ -32,45 +36,104 @@
 
 <script setup>
 import Header from "@/components/header.vue";
-import { ref } from "vue";
-import axios from "axios";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import request from '@/utils/request';
 
 const account = ref("");
 const password = ref("");
-const user = ref(null); // Store user state globally
+const showReset = ref(false);
+const resetAccount = ref("");
+const rememberMe = ref(localStorage.getItem('rememberMe') === 'true');
 const router = useRouter();
 
-function handleLogin() {
-    axios.post("http://localhost:3000/api/login", {
-        account: account.value,
-        password: password.value
-    })
-    .then(res => {
-        if (res.data.code === 0) {
-            user.value = res.data.user; // Save user data
-            localStorage.setItem("user", JSON.stringify(res.data.user));
-            alert("登录成功！");
-            router.push("/"); // Redirect to homepage
-        } else {
-            alert(res.data.msg || "登录失败");
+// 在组件挂载时检查是否有保存的账号密码
+onMounted(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+        router.push("/");
+        return;
+    }
+
+    // 如果之前选择了记住密码，则自动填充
+    if (localStorage.getItem('rememberMe') === 'true') {
+        const savedAccount = localStorage.getItem('savedAccount');
+        const savedPassword = localStorage.getItem('savedPassword');
+        if (savedAccount && savedPassword) {
+            account.value = savedAccount;
+            password.value = atob(savedPassword); // 解码保存的密码
         }
-    })
-    .catch(() => {
-        alert("网络错误，请稍后重试");
-    });
+    }
+});
+
+async function handleLogin() {
+    try {
+        const res = await request.post("/api/login", {
+            account: account.value,
+            password: password.value
+        });
+
+        if (res.data.code === 0) {
+            // 保存登录状态
+            localStorage.setItem("token", res.data.data.token);
+            localStorage.setItem("user", JSON.stringify(res.data.data.user));
+            
+            // 处理记住密码
+            localStorage.setItem('rememberMe', rememberMe.value);
+            if (rememberMe.value) {
+                localStorage.setItem('savedAccount', account.value);
+                localStorage.setItem('savedPassword', btoa(password.value)); // 使用base64编码存储密码
+            } else {
+                // 如果取消记住密码，则清除保存的信息
+                localStorage.removeItem('savedAccount');
+                localStorage.removeItem('savedPassword');
+            }
+
+            ElMessage.success("登录成功！");
+            router.push("/"); 
+        } else {
+            ElMessage.error(res.data.msg || "登录失败");
+        }
+    } catch (error) {
+        console.error("登录错误:", error);
+        ElMessage.error("网络错误，请稍后重试");
+    }
 }
+
 function resetPassword() {
     showReset.value = true;
 }
-function submitReset() {
-    alert(`重置密码账户：${resetAccount.value}`);
+
+async function submitReset() {
+    try {
+        const res = await axios.post("http://localhost:3000/api/reset-password", {
+            account: resetAccount.value
+        });
+
+        if (res.data.code === 0) {
+            alert("重置密码邮件已发送，请查收");
+        } else {
+            alert(res.data.msg || "重置密码失败");
+        }
+    } catch (error) {
+        console.error("重置密码错误:", error);
+        alert("网络错误，请稍后重试");
+    }
     showReset.value = false;
     resetAccount.value = "";
 }
+
 function registerAccount() {
-    alert("跳转到注册账号页面或弹出注册表单");
+    router.push("/register");
 }
+
+// 检查是否已登录
+onMounted(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+        router.push("/");
+    }
+});
 </script>
 
 <style scoped>
@@ -271,5 +334,22 @@ h2 {
 
 .reset-password button:last-child:hover {
     background: #c6dafc;
+}
+
+/* 添加记住密码选项的样式 */
+.remember-me {
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    color: #205ec9;
+}
+
+.remember-me :deep(.el-checkbox__label) {
+    color: #205ec9;
+}
+
+.remember-me :deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+    background-color: #205ec9;
+    border-color: #205ec9;
 }
 </style>

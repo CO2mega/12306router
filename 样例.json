@@ -1,0 +1,539 @@
+http: //localhost:3000/api/routes/direct?from=北京&to=上海
+{
+    "code": 0,
+    "data": {
+        "routes": [
+            {
+                "trainCode": "1461",
+                "from": {
+                    "station": "北京",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海",
+                    "sequence": 21
+                }
+            },
+            {
+                "trainCode": "D705",
+                "from": {
+                    "station": "北京",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海",
+                    "sequence": 5
+                }
+            },
+            {
+                "trainCode": "D709",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海",
+                    "sequence": 5
+                }
+            },
+            {
+                "trainCode": "G1",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海",
+                    "sequence": 4
+                }
+            },
+            {
+                "trainCode": "G101",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 11
+                }
+            },
+            {
+                "trainCode": "G103",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 9
+                }
+            },
+            {
+                "trainCode": "G105",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 9
+                }
+            },
+            {
+                "trainCode": "G107",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 9
+                }
+            },
+            {
+                "trainCode": "G109",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 11
+                }
+            },
+            {
+                "trainCode": "G11",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 5
+                }
+            },
+            {
+                "trainCode": "G111",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 11
+                }
+            },
+            {
+                "trainCode": "G113",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 9
+                }
+            },
+            {
+                "trainCode": "G115",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 8
+                }
+            },
+            {
+                "trainCode": "G117",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 8
+                }
+            },
+            {
+                "trainCode": "G119",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 12
+                }
+            },
+            {
+                "trainCode": "G121",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 9
+                }
+            },
+            {
+                "trainCode": "G123",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 11
+                }
+            },
+            {
+                "trainCode": "G125",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 11
+                }
+            },
+            {
+                "trainCode": "G127",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 12
+                }
+            },
+            {
+                "trainCode": "G129",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 14
+                }
+            },
+            {
+                "trainCode": "G13",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海",
+                    "sequence": 5
+                }
+            },
+            {
+                "trainCode": "G131",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 11
+                }
+            },
+            {
+                "trainCode": "G133",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海",
+                    "sequence": 12
+                }
+            },
+            {
+                "trainCode": "G135",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 13
+                }
+            },
+            {
+                "trainCode": "G137",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 11
+                }
+            },
+            {
+                "trainCode": "G139",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 11
+                }
+            },
+            {
+                "trainCode": "G141",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 13
+                }
+            },
+            {
+                "trainCode": "G143",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 11
+                }
+            },
+            {
+                "trainCode": "G145",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 11
+                }
+            },
+            {
+                "trainCode": "G147",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 11
+                }
+            },
+            {
+                "trainCode": "G149",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 12
+                }
+            },
+            {
+                "trainCode": "G15",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 5
+                }
+            },
+            {
+                "trainCode": "G151",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 13
+                }
+            },
+            {
+                "trainCode": "G153",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 11
+                }
+            },
+            {
+                "trainCode": "G157",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 14
+                }
+            },
+            {
+                "trainCode": "G159",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 11
+                }
+            },
+            {
+                "trainCode": "G161",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 11
+                }
+            },
+            {
+                "trainCode": "G17",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 5
+                }
+            },
+            {
+                "trainCode": "G19",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 4
+                }
+            },
+            {
+                "trainCode": "G21",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 3
+                }
+            },
+            {
+                "trainCode": "G23",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海",
+                    "sequence": 5
+                }
+            },
+            {
+                "trainCode": "G25",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 7
+                }
+            },
+            {
+                "trainCode": "G27",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海",
+                    "sequence": 4
+                }
+            },
+            {
+                "trainCode": "G3",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海",
+                    "sequence": 4
+                }
+            },
+            {
+                "trainCode": "G5",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 5
+                }
+            },
+            {
+                "trainCode": "G7",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 5
+                }
+            },
+            {
+                "trainCode": "G9",
+                "from": {
+                    "station": "北京南",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海虹桥",
+                    "sequence": 5
+                }
+            },
+            {
+                "trainCode": "T109",
+                "from": {
+                    "station": "北京",
+                    "sequence": 1
+                },
+                "to": {
+                    "station": "上海",
+                    "sequence": 10
+                }
+            }
+        ],
+        "total": 48,
+        "from": "北京",
+        "to": "上海"
+    }
+}

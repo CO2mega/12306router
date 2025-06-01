@@ -1,167 +1,145 @@
 <template>
-  <div class="header-container">
-    <div class="header-left flex-box">
-      <span class="logo">12306</span>
-      <el-menu
-        :default-active="activeIndex"
-        class="el-menu-demo"
-        mode="horizontal"
-        background-color="#1976d2"
-        text-color="#fff"
-        active-text-color="#ffd04b"
-        :ellipsis="false"
-        @select="handleSelect"
-      >
-        <el-menu-item index="1">首页</el-menu-item>
-        <el-sub-menu index="2">
-          <template #title>车票</template>
-          <template #default>
-            <div class="submenu-columns">
-              <div class="submenu-col">
-                <div class="submenu-title active">购买</div>
-                <div class="submenu-item">单程</div>
-                <div class="submenu-item">中转换乘</div>
-              </div>
-              <div class="submenu-col">
-                <div class="submenu-title"></div>
-                <div class="submenu-item">往返</div>
-                <div class="submenu-item">计次·定期票</div>
-              </div>
-              <div class="submenu-col">
-                <div class="submenu-title active">变更</div>
-                <div class="submenu-item">退票</div>
-                <div class="submenu-item">变更到站</div>
-              </div>
-              <div class="submenu-col">
-                <div class="submenu-title"></div>
-                <div class="submenu-item">改签</div>
-              </div>
-            </div>
-          </template>
-        </el-sub-menu>
-      </el-menu>
+  <div class="header">
+    <div class="logo" @click="goToHome">
+      <span class="logo-text">12306</span>
     </div>
-    <div class="header-right">
-      <el-button type="primary" size="small" @click="goLogin">登录</el-button>
-      <el-button type="text" size="small" @click="goRegister">注册</el-button>
+    <div class="nav-menu">
+      <router-link to="/ticket" class="nav-item">车票</router-link>
+      <router-link to="/change-ticket" class="nav-item">改签</router-link>
+    </div>
+    <div class="nav-links">
+      <template v-if="userInfo">
+        <div class="user-info" @click="goToUserProfile">
+          <span class="username">{{ userInfo.account }}</span>
+        </div>
+      </template>
+      <template v-else>
+        <router-link to="/login">登录</router-link>
+        <router-link to="/register">注册</router-link>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useRoute, useRouter } from "vue-router";
-import { ref } from "vue";
-const route = useRoute();
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
 const router = useRouter();
+const userInfo = ref(null);
 
-const activeIndex = ref("1");
-const handleSelect = (key) => {
-  if (key === "1") router.push("/");
-  if (key === "2-1") router.push("/ticket");
-  if (key === "2-2") router.push("/query");
+// 获取用户信息
+onMounted(() => {
+  const savedUser = localStorage.getItem('user');
+  if (savedUser) {
+    userInfo.value = JSON.parse(savedUser);
+  }
+});
+
+// 跳转到用户信息页面
+const goToUserProfile = () => {
+  router.push('/user-profile');
 };
 
-const goLogin = () => {
-  router.push("/login");
-};
-const gosignup = () => {
-  router.push("/signup");
+// 添加返回首页方法
+const goToHome = () => {
+  router.push('/');
 };
 </script>
 
 <style scoped>
-.header-container {
-  width: 100vw;
-  height: 64px;
-  background: #1976d2;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-sizing: border-box;
-  padding: 0 40px;
-  position: fixed;
+.header {
+  position: fixed;  /* 固定在顶部 */
   top: 0;
   left: 0;
-  z-index: 100;
+  right: 0;
+  width: 100vw;  /* 使用视口宽度 */
+  height: 60px;
+  background-color: #205ec9;
+  display: flex;
+  justify-content: flex-start;  /* 改为左对齐 */
+  align-items: center;
+  padding: 0 20px;
+  box-sizing: border-box;
+  z-index: 1000;  /* 确保header始终在最上层 */
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  height: 100%;
+/* 为了防止内容被fixed header遮挡，需要给body添加padding-top */
+:deep(body) {
+  padding-top: 60px;
 }
 
 .logo {
-  font-size: 28px;
+  display: flex;
+  align-items: center;
+  cursor: pointer; /* 添加手型光标 */
+  transition: opacity 0.3s; /* 添加过渡效果 */
+}
+
+.logo:hover {
+  opacity: 0.8; /* 添加悬停效果 */
+}
+
+.logo-text {
+  color: white;
+  font-size: 24px;
   font-weight: bold;
-  margin-right: 32px;
   letter-spacing: 2px;
 }
 
-.el-menu-demo {
-  background: transparent;
-  border-bottom: none;
-  color: #fff;
-  min-width: 400px;
-}
-
-.header-right {
+.nav-menu {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  gap: 30px;
+  margin-left: 40px;
 }
 
-.el-button--primary {
-  background: #fff;
-  color: #1976d2;
-  border: none;
+.nav-item {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  padding: 5px 15px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
 }
 
-.el-button--text {
-  color: #fff;
+.nav-item:hover {
+  background-color: #174a9c;
 }
 
-.submenu-columns {
+.nav-item.router-link-active {
+  background-color: #174a9c;
+}
+
+.nav-links {
+  margin-left: auto;  /* 将用户相关链接推到最右边 */
   display: flex;
-  min-width: 520px;
-  padding: 18px 0 18px 0;
-  background: #fff;
-  color: #333;
-  box-shadow: 0 2px 8px rgba(32, 94, 201, 0.08);
-  border-radius: 6px;
-  gap: 32px;
-  border: none;
+  gap: 20px;
 }
-.submenu-col {
-  display: flex;
-  flex-direction: column;
-  min-width: 100px;
-  border-right: 1px solid #e3eefd;
-  padding: 0 24px;
-}
-.submenu-col:last-child {
-  border-right: none;
-}
-.submenu-title {
-  font-weight: 500;
-  color: #1976d2;
-  margin-bottom: 8px;
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
   font-size: 16px;
 }
-.submenu-title.active {
-  color: #1976d2;
+
+.nav-links a:hover {
+  opacity: 0.8;
 }
-.submenu-item {
-  color: #333;
-  font-size: 15px;
-  padding: 6px 0;
+
+.user-info {
   cursor: pointer;
+  color: white;
+  padding: 5px 15px;
   border-radius: 4px;
-  transition: background 0.2s, color 0.2s;
+  transition: background-color 0.3s;
 }
-.submenu-item:hover {
-  background: #f5f7fa;
-  color: #1976d2;
+
+.user-info:hover {
+  background-color: #174a9c;
+}
+
+.username {
+  font-size: 16px;
+  font-weight: 500;
 }
 </style>
