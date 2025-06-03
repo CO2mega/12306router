@@ -5,12 +5,8 @@
       element-loading-text="正在查询..."
       element-loading-background="rgba(255, 255, 255, 0.8)"
     >
-      <!-- 完全移除标题 -->
-      
-      <!-- 表单部分 -->
+
       <el-form :inline="true" class="ticket-form" @submit.prevent="handleSearch">
-        <!-- 表单内容保持不变 -->
-        <!-- 修改出发地选择 -->
         <el-form-item label="出发地">
           <div class="select-wrapper from-select">
             <div 
@@ -30,7 +26,6 @@
           </div>
         </el-form-item>
 
-        <!-- 修改到达地选择 -->
         <el-form-item label="目的地">
           <div class="select-wrapper to-select">
             <div 
@@ -62,6 +57,14 @@
             style="width: 180px"
           />
         </el-form-item>
+        
+        <!-- 添加高铁/动车勾选框 -->
+        <el-form-item>
+          <el-checkbox v-model="searchForm.isHighSpeed" @change="handleFilterChange">
+            只看高铁/动车
+          </el-checkbox>
+        </el-form-item>
+        
         <el-form-item>
           <el-button type="primary" :loading="loading" @click="handleSearch">查询</el-button>
         </el-form-item>
@@ -70,7 +73,7 @@
       <!-- 修改表格配置，添加滚动支持 -->
       <div class="table-container">
         <el-table 
-          :data="tickets" 
+          :data="filteredTickets" 
           v-loading="loading"
           style="width: 100%"
           :fit="true"
@@ -123,16 +126,16 @@ import request from '@/utils/request'
 const route = useRoute()
 const loading = ref(false)
 
-// 从路由查询参数初始化表单
+// 从路由查询参数初始化表单，确保包含isHighSpeed参数
 const searchForm = reactive({
   from: route.query.from || '',
   to: route.query.to || '',
   date: route.query.date || new Date().toISOString().slice(0, 10),
   isStudent: route.query.isStudent === 'true',
-  isHighSpeed: route.query.isHighSpeed === 'true'
+  isHighSpeed: route.query.isHighSpeed === 'true'  // 保留原有的参数
 })
 
-// 监听路由参数变化
+// 监听路由参数变化，确保包含isHighSpeed参数
 watch(
   () => route.query,
   (query) => {
@@ -144,12 +147,26 @@ watch(
   }
 )
 
-// 组件挂载时自动查询
-onMounted(() => {
-  if (searchForm.from && searchForm.to) {
-    handleSearch()
+// 原始车票数据
+const tickets = ref([])
+
+// 过滤后的车票数据 - 添加computed属性来过滤高铁/动车
+const filteredTickets = computed(() => {
+  if (!searchForm.isHighSpeed) {
+    return tickets.value;
   }
-})
+  
+  // 只返回G或D开头的车次
+  return tickets.value.filter(ticket => {
+    const trainCode = ticket.trainCode.toUpperCase();
+    return trainCode.startsWith('G') || trainCode.startsWith('D');
+  });
+});
+
+// 处理过滤变化，不需要重新请求数据
+function handleFilterChange() {
+  // 只是UI层面的过滤，无需重新请求数据
+}
 
 // 日期选择器的禁用日期范围
 const disabledDate = (time) => {
@@ -197,8 +214,6 @@ const shortcuts = [
   }
 ]
 
-const tickets = ref([])
-
 const handleSearch = async () => {
   if (!searchForm.from || !searchForm.to || !searchForm.date) {
     ElMessage.warning('请填写完整查询信息')
@@ -215,6 +230,8 @@ const handleSearch = async () => {
       tickets.value = data.data.routes
       if (tickets.value.length === 0) {
         ElMessage.info('未找到符合条件的车次')
+      } else if (searchForm.isHighSpeed && filteredTickets.value.length === 0) {
+        ElMessage.info('未找到符合条件的高铁/动车')
       }
     } else {
       ElMessage.error(data.msg || '查询失败')
@@ -227,26 +244,33 @@ const handleSearch = async () => {
   }
 }
 
-// 预订车票
+// 修改预订车票函数
 const handleBook = async (ticket) => {
   try {
+    if (!localStorage.getItem('token')) {
+      ElMessage.warning('请先登录后再预订车票');
+      return;
+    }
+
     const { data } = await request.post('/api/tickets', {
       trainCode: ticket.trainCode,
       trainFullCode: ticket.trainFullCode,
       fromStation: ticket.from.station,
       toStation: ticket.to.station,
+      fromStationNo: ticket.from.sequence,
+      toStationNo: ticket.to.sequence,
       travelDate: searchForm.date
-    })
+    });
 
     if (data.code === 0) {
-      ElMessage.success('预订成功！')
-      ticket.ticketsLeft -= 1  // 减少余票
+      ElMessage.success('预订成功！');
+      ticket.ticketsLeft -= 1;
     } else {
-      ElMessage.error(data.msg || '预订失败')
+      ElMessage.error(data.msg || '预订失败');
     }
   } catch (error) {
-    console.error('预订错误:', error)
-    ElMessage.error('网络错误，请稍后重试')
+    console.error('预订错误:', error);
+    ElMessage.error('网络错误，请稍后重试');
   }
 }
 
@@ -356,13 +380,12 @@ function selectToCity(city) {
   width: 100%;
   min-height: calc(100vh - 60px);
   background: #fff;
-  padding: 40px 80px 100px; /* 增大顶部和底部内边距 */
+  padding: 20px 80px 100px; /* 保留内边距 */
   box-sizing: border-box;
-  margin: 50px auto 120px auto; /* 左右居中，底部margin增大为120px */
+  margin: 0 auto 120px auto; /* 移除顶部边距，只保留底部和左右边距 */
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  
 }
 
 /* 完全移除标题 */
@@ -461,7 +484,7 @@ h2 {
   position: relative;
   min-width: 200px; /* 增大选择器宽度 */
   width: auto;
-  z-index: 2000; /* 增加 z-index，确保下拉菜单在表格之上 */
+  
 }
 
 .city-select {
@@ -481,7 +504,7 @@ h2 {
 
 .city-dropdown {
   position: fixed; /* 改为固定定位，防止被容器裁剪 */
-  z-index: 2500; /* 确保在最顶层 */
+ z-index: 999;
   background: #fff;
   border: 1px solid #e4e7ed;
   border-radius: 4px;
@@ -491,16 +514,7 @@ h2 {
   overflow-y: auto; /* 允许垂直滚动 */
 }
 
-/* 单独定位从出发地和目的地下拉框 */
-.from-dropdown {
-  top: auto; /* 清除可能的top设置 */
-  left: auto; /* 清除可能的left设置 */
-}
 
-.to-dropdown {
-  top: auto; /* 清除可能的top设置 */
-  left: auto; /* 清除可能的left设置 */
-}
 
 .city-list {
   display: grid;
@@ -581,5 +595,16 @@ h2 {
   content: "";
   display: block;
   height: 40px; /* 页面底部额外空间 */
+}
+
+/* 添加勾选框样式 */
+:deep(.el-checkbox__label) {
+  font-size: 14px;
+  color: #606266;
+}
+
+:deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+  background-color: #409eff;
+  border-color: #409eff;
 }
 </style>

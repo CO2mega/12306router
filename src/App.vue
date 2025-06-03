@@ -6,10 +6,20 @@
 import { RouterView } from "vue-router";
 </script>
 
-<style scoped>
-body {
-  padding-top: 60px; /* 添加顶部内边距，避免内容被 header 遮挡 */
+<style>
+/* 全局样式设置 */
+html, body {
   margin: 0;
-  overflow-x: hidden; /* 防止水平滚动条 */
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  width: 100%;
+  height: 100%;
 }
 </style>

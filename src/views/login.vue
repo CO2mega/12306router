@@ -1,355 +1,367 @@
 <template>
-    <div>
-        <Header />
-        <div class="login-container">
-            <h2>登录</h2>
-            <form @submit.prevent="handleLogin">
-                <div class="form-group">
-                    <label for="account">账户</label>
-                    <input id="account" v-model="account" type="text" required placeholder="请输入账户" />
-                </div>
-                <div class="form-group">
-                    <label for="password">密码</label>
-                    <input id="password" v-model="password" type="password" required placeholder="请输入密码" />
-                </div>
-                <!-- 添加记住密码选项 -->
-                <div class="remember-me">
-                    <el-checkbox v-model="rememberMe">记住密码</el-checkbox>
-                </div>
-                <div class="form-actions">
-                    <button type="submit">登录</button>
-                    <button type="button" @click="resetPassword">重置密码</button>
-                </div>
-            </form>
-            <div v-if="showReset" class="reset-password">
-                <h3>重置密码</h3>
-                <input v-model="resetAccount" type="text" placeholder="请输入账户" />
-                <button @click="submitReset">提交</button>
-                <button @click="showReset = false">取消</button>
-                <div style="margin-top: 18px; text-align: right;">
-                    <button @click="registerAccount" type="button">注册账号</button>
-                </div>
-            </div>
+  <div class="login-container">
+    <h2>用户登录</h2>
+    <form @submit.prevent="handleLogin">
+      <div class="form-group">
+        <label for="account">账户名</label>
+        <input id="account" v-model="account" type="text" placeholder="请输入账户名" required />
+      </div>
+      <div class="form-group">
+        <label for="password">密码</label>
+        <input id="password" v-model="password" type="password" placeholder="请输入密码" required />
+      </div>
+      <div class="form-options">
+        <label class="remember-me">
+          <input type="checkbox" v-model="rememberMe" />
+          <span>记住我</span>
+        </label>
+        <a class="forgot-password" @click="showReset = true">忘记密码?</a>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="login-btn" :disabled="loading">
+          {{ loading ? '登录中...' : '登录' }}
+        </button>
+        <button type="button" class="register-btn" @click="goToRegister">注册账户</button>
+      </div>
+    </form>
+
+    <!-- 重置密码对话框 - 修改为直接重置密码的版本 -->
+    <div v-if="showReset" class="reset-modal">
+      <div class="reset-content">
+        <h3>重置密码</h3>
+        <div class="form-group">
+          <label for="reset-account">账户名</label>
+          <input id="reset-account" v-model="resetAccount" type="text" placeholder="请输入账户名" />
         </div>
+        <div class="form-group">
+          <label for="new-password">新密码</label>
+          <input id="new-password" v-model="newPassword" type="password" placeholder="请输入新密码" />
+        </div>
+        <div class="form-group">
+          <label for="confirm-password">确认密码</label>
+          <input id="confirm-password" v-model="confirmPassword" type="password" placeholder="请再次输入新密码" />
+        </div>
+        <div class="reset-actions">
+          <button @click="submitReset" :disabled="resetLoading">
+            {{ resetLoading ? '提交中...' : '提交' }}
+          </button>
+          <button @click="cancelReset">取消</button>
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script setup>
-import Header from "@/components/header.vue";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import request from '@/utils/request';
+import { ElMessage } from 'element-plus';
 
 const account = ref("");
 const password = ref("");
+const rememberMe = ref(false);
 const showReset = ref(false);
 const resetAccount = ref("");
-const rememberMe = ref(localStorage.getItem('rememberMe') === 'true');
+const newPassword = ref("");
+const confirmPassword = ref("");
+const loading = ref(false);
+const resetLoading = ref(false);
 const router = useRouter();
 
-// 在组件挂载时检查是否有保存的账号密码
+// 检查是否有记住的登录信息
 onMounted(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-        router.push("/");
-        return;
-    }
-
-    // 如果之前选择了记住密码，则自动填充
-    if (localStorage.getItem('rememberMe') === 'true') {
-        const savedAccount = localStorage.getItem('savedAccount');
-        const savedPassword = localStorage.getItem('savedPassword');
-        if (savedAccount && savedPassword) {
-            account.value = savedAccount;
-            password.value = atob(savedPassword); // 解码保存的密码
-        }
-    }
+  const savedAccount = localStorage.getItem('savedAccount');
+  if (savedAccount) {
+    account.value = savedAccount;
+    rememberMe.value = true;
+  }
 });
 
+// 处理登录
 async function handleLogin() {
-    try {
-        const res = await request.post("/api/login", {
-            account: account.value,
-            password: password.value
-        });
+  if (!account.value || !password.value) {
+    ElMessage.warning('请输入账户和密码');
+    return;
+  }
 
-        if (res.data.code === 0) {
-            // 保存登录状态
-            localStorage.setItem("token", res.data.data.token);
-            localStorage.setItem("user", JSON.stringify(res.data.data.user));
-            
-            // 处理记住密码
-            localStorage.setItem('rememberMe', rememberMe.value);
-            if (rememberMe.value) {
-                localStorage.setItem('savedAccount', account.value);
-                localStorage.setItem('savedPassword', btoa(password.value)); // 使用base64编码存储密码
-            } else {
-                // 如果取消记住密码，则清除保存的信息
-                localStorage.removeItem('savedAccount');
-                localStorage.removeItem('savedPassword');
-            }
-
-            ElMessage.success("登录成功！");
-            router.push("/"); 
-        } else {
-            ElMessage.error(res.data.msg || "登录失败");
-        }
-    } catch (error) {
-        console.error("登录错误:", error);
-        ElMessage.error("网络错误，请稍后重试");
+  loading.value = true;
+  
+  try {
+    const res = await request.post("/api/login", {
+      account: account.value,
+      password: password.value
+    });
+    
+    console.log('登录响应：', res.data);
+    
+    if (res.data.code === 0) {
+      // 记住用户名
+      if (rememberMe.value) {
+        localStorage.setItem('savedAccount', account.value);
+      } else {
+        localStorage.removeItem('savedAccount');
+      }
+      
+      // 存储用户信息
+      localStorage.setItem('token', res.data.data.token);
+      
+      const userData = {
+        id: res.data.data.user.id,
+        account: res.data.data.user.account
+      };
+      console.log('存储的用户数据：', userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('userId', userData.id);
+      
+      ElMessage.success('登录成功');
+      
+      // 强制触发storage事件
+      window.dispatchEvent(new Event('storage'));
+      
+      router.push('/');
+    } else {
+      ElMessage.error(res.data.msg || '账户或密码错误');
     }
+  } catch (error) {
+    console.error('登录错误：', error);
+    ElMessage.error('网络错误，请稍后重试');
+  } finally {
+    loading.value = false;
+  }
 }
 
-function resetPassword() {
-    showReset.value = true;
-}
-
+// 提交重置密码请求 - 修改为直接重置密码
 async function submitReset() {
-    try {
-        const res = await axios.post("http://localhost:3000/api/reset-password", {
-            account: resetAccount.value
-        });
-
-        if (res.data.code === 0) {
-            alert("重置密码邮件已发送，请查收");
-        } else {
-            alert(res.data.msg || "重置密码失败");
-        }
-    } catch (error) {
-        console.error("重置密码错误:", error);
-        alert("网络错误，请稍后重试");
+  // 验证输入
+  if (!resetAccount.value) {
+    ElMessage.warning('请输入账户名');
+    return;
+  }
+  
+  if (!newPassword.value || !confirmPassword.value) {
+    ElMessage.warning('请输入新密码和确认密码');
+    return;
+  }
+  
+  if (newPassword.value !== confirmPassword.value) {
+    ElMessage.warning('两次输入的密码不一致');
+    return;
+  }
+  
+  resetLoading.value = true;
+  
+  try {
+    const res = await request.post("/api/reset-password", {
+      account: resetAccount.value,
+      newPassword: newPassword.value,
+      confirmPassword: confirmPassword.value
+    });
+    
+    if (res.data.code === 0) {
+      ElMessage.success('密码重置成功，请使用新密码登录');
+      cancelReset();
+    } else {
+      ElMessage.error(res.data.msg || '重置密码失败');
     }
-    showReset.value = false;
-    resetAccount.value = "";
+  } catch (error) {
+    console.error('重置密码错误：', error);
+    ElMessage.error('网络错误，请稍后重试');
+  } finally {
+    resetLoading.value = false;
+  }
 }
 
-function registerAccount() {
-    router.push("/register");
+// 取消重置密码并清空表单
+function cancelReset() {
+  showReset.value = false;
+  resetAccount.value = "";
+  newPassword.value = "";
+  confirmPassword.value = "";
 }
 
-// 检查是否已登录
-onMounted(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-        router.push("/");
-    }
-});
+// 跳转到注册页面
+function goToRegister() {
+  router.push('/register');
+}
 </script>
 
 <style scoped>
-body, html, #app {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-  
-/* 新增外层居中样式 */
-:deep(body) {
-    min-height: 100vh;
-    margin: 0;
-    padding: 0;
-}
-  
-/* 让父容器居中 */
+/* 登录页样式 */
 .login-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    max-width: 480px;
-    min-height: 480px;
-    margin: 0 auto;
-    padding: 36px 28px;
-    border-radius: 12px;
-    background: #f7faff;
-    box-shadow: 0 4px 24px rgba(0, 80, 180, 0.08);
-    border: 1px solid #e3eefd;
-    /* 让容器在父级中垂直居中 */
-    position: relative;
-    top: 50vh;
-    transform: translateY(-50%);
-}
-
-.login-header {
-    width: 100vw;
-    background: #205ec9;
-    padding: 0 0 0 32px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    box-shadow: 0 2px 8px rgba(32, 94, 201, 0.08);
-}
-
-.header-title {
-    display: flex;
-    align-items: center;
-    font-size: 20px;
-    color: #fff;
-    font-weight: bold;
-    letter-spacing: 2px;
-}
-
-.logo {
-    height: 32px;
-    margin-right: 12px;
+  max-width: 400px;
+  margin: 60px auto;
+  padding: 30px;
+  background: #f9fbff;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
 }
 
 h2 {
-    color: #205ec9;
-    text-align: center;
-    margin-bottom: 28px;
-    letter-spacing: 2px;
+  text-align: center;
+  color: #205ec9;
+  margin-bottom: 25px;
 }
 
 .form-group {
-    margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 7px;
-    color: #205ec9;
-    font-weight: 500;
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
 }
 
 .form-group input {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #b7d0f7;
-    border-radius: 5px;
-    background: #fff;
-    font-size: 15px;
-    transition: border 0.2s;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 15px;
+  transition: border 0.3s;
 }
 
 .form-group input:focus {
-    border: 1.5px solid #205ec9;
-    outline: none;
+  border-color: #205ec9;
+  outline: none;
 }
 
-.captcha-group {
-    display: flex;
-    align-items: center;
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
-.captcha-input {
-    width: auto;
-    min-width: 30px;
-    max-width: 80px;
-    margin-left: 10px;
-    margin-right: 12px;
-    padding: 8px 6px;
-    /* 保证和其他输入框高度一致 */
-    box-sizing: border-box;
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
 }
 
-.captcha-img {
-    height: 36px;
-    width: auto;
-    cursor: pointer;
-    border: 1px solid #b7d0f7;
-    border-radius: 5px;
-    background: #fff;
-    transition: box-shadow 0.2s;
+.forgot-password {
+  color: #205ec9;
+  text-decoration: none;
+  cursor: pointer;
 }
 
-.captcha-img:hover {
-    box-shadow: 0 0 4px #205ec9;
+.forgot-password:hover {
+  text-decoration: underline;
 }
 
 .form-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 18px;
+  display: flex;
+  gap: 15px;
 }
 
-.form-actions button {
-    padding: 7px 22px;
-    border: none;
-    border-radius: 5px;
-    background: #205ec9;
-    color: #fff;
-    font-weight: 500;
-    font-size: 15px;
-    cursor: pointer;
-    transition: background 0.2s;
+.login-btn, .register-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.3s;
 }
 
-.form-actions button[type="button"] {
-    background: #e3eefd;
-    color: #205ec9;
+.login-btn {
+  background: #205ec9;
+  color: white;
 }
 
-.form-actions button:hover {
-    background: #174a9c;
+.login-btn:hover {
+  background: #1a4da3;
 }
 
-.form-actions button[type="button"]:hover {
-    background: #c6dafc;
+.register-btn {
+  background: #f0f2f5;
+  color: #205ec9;
+  border: 1px solid #ddd;
 }
 
-.reset-password {
-    margin-top: 24px;
-    padding: 18px;
-    border: 1px solid #b7d0f7;
-    border-radius: 8px;
-    background: #eaf2fd;
+.register-btn:hover {
+  background: #e0e5eb;
 }
 
-.reset-password h3 {
-    color: #205ec9;
-    margin-bottom: 12px;
+.login-btn:disabled {
+  background: #95b7e8;
+  cursor: not-allowed;
 }
 
-.reset-password input {
-    width: 68%;
-    margin-right: 10px;
-    padding: 7px 10px;
-    border: 1px solid #b7d0f7;
-    border-radius: 5px;
-    background: #fff;
+/* 重置密码弹窗样式 */
+.reset-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
 
-.reset-password button {
-    padding: 6px 16px;
-    border: none;
-    border-radius: 5px;
-    background: #205ec9;
-    color: #fff;
-    font-size: 14px;
-    margin-right: 6px;
-    cursor: pointer;
-    transition: background 0.2s;
+.reset-content {
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  border-radius: 8px;
+  padding: 25px;
 }
 
-.reset-password button:last-child {
-    background: #e3eefd;
-    color: #205ec9;
+.reset-content h3 {
+  margin-top: 0;
+  color: #205ec9;
 }
 
-.reset-password button:hover:not(:last-child) {
-    background: #174a9c;
+.reset-content .form-group {
+  margin-bottom: 15px;
 }
 
-.reset-password button:last-child:hover {
-    background: #c6dafc;
+.reset-content label {
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+  font-weight: 500;
 }
 
-/* 添加记住密码选项的样式 */
-.remember-me {
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    color: #205ec9;
+.reset-content input {
+  width: 100%;
+  padding: 10px;
+  margin: 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
-.remember-me :deep(.el-checkbox__label) {
-    color: #205ec9;
+.reset-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
 }
 
-.remember-me :deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
-    background-color: #205ec9;
-    border-color: #205ec9;
+.reset-actions button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.reset-actions button:first-child {
+  background: #205ec9;
+  color: white;
+}
+
+.reset-actions button:first-child:disabled {
+  background: #95b7e8;
+  cursor: not-allowed;
+}
+
+.reset-actions button:last-child {
+  background: #f0f2f5;
+  color: #333;
 }
 </style>

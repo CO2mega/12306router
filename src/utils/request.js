@@ -1,7 +1,5 @@
 import axios from 'axios';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
+import router from '../router'; // 直接导入路由实例
 
 // 创建 axios 实例
 const request = axios.create({
