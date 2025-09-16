@@ -100,7 +100,6 @@ const showFromCity = ref(false);
 const showToCity = ref(false);
 const loading = ref(false);
 
-// 热门城市列表 - 将在mounted中从后端获取
 const hotCities = ref([
   "北京", "上海", "天津", "重庆", "长沙", "长春",
   "成都", "福州", "广州", "贵阳", "呼和浩特", "哈尔滨",
@@ -143,14 +142,14 @@ async function onQuery() {
 function toggleFromCity() {
   showFromCity.value = !showFromCity.value;
   if (showFromCity.value) {
-    showToCity.value = false;  // 关闭到达地选框
+    showToCity.value = false;  
   }
 }
 
 function toggleToCity() {
   showToCity.value = !showToCity.value;
   if (showToCity.value) {
-    showFromCity.value = false;  // 关闭出发地选框
+    showFromCity.value = false;  
   }
 }
 

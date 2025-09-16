@@ -159,7 +159,32 @@ async function initAllDatabases() {
 }
 
 // 启动时初始化
-await initAllDatabases();
+(async function() {
+  try {
+    // 初始化数据库
+    await initAllDatabases();
+    await ensureTicketTablesExist();
+    
+    // 启动服务器
+    const PORT = 3000;
+    const server = app.listen(PORT, () => {
+      console.log(`Mock server running at http://localhost:${PORT}`);
+    });
+    
+    // 添加服务器错误处理
+    server.on('error', (error) => {
+      console.error('服务器错误:', error);
+    });
+    
+    // 添加服务器关闭处理
+    server.on('close', () => {
+      console.log('服务器已关闭');
+    });
+    
+  } catch (error) {
+    console.error('服务器启动失败:', error);
+  }
+})();
 
 // 车票列表接口
 app.get('/api/tickets', async (req, res) => {
@@ -1040,11 +1065,6 @@ app.post('/api/reset-password', async (req, res) => {
   }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Mock server running at http://localhost:${PORT}`);
-});
-
 // 替换现有的关闭连接池代码
 let isShuttingDown = false;
 
@@ -1057,6 +1077,12 @@ process.on('SIGINT', async () => {
   isShuttingDown = true;
   console.log('开始关闭数据库连接池...');
   
+  // 添加超时保护
+  const forceExitTimeout = setTimeout(() => {
+    console.log('强制退出进程 - 连接池关闭超时');
+    process.exit(1);
+  }, 5000); // 给予更多时间完成清理
+  
   try {
     await Promise.all([
       knex.destroy().catch(err => console.error('关闭主数据库连接池错误:', err)),
@@ -1064,16 +1090,29 @@ process.on('SIGINT', async () => {
       stationsDb.destroy().catch(err => console.error('关闭站点数据库连接池错误:', err)),
       trainsDb.destroy().catch(err => console.error('关闭列车数据库连接池错误:', err))
     ]);
+    
+    // 清除超时定时器
+    clearTimeout(forceExitTimeout);
+    
     console.log('所有数据库连接池已关闭');
+    process.exit(0);
   } catch (err) {
+    // 清除超时定时器
+    clearTimeout(forceExitTimeout);
+    
     console.error('关闭数据库连接池时出错:', err);
-  }
-  
-  // 强制退出，避免挂起
-  setTimeout(() => {
-    console.log('强制退出进程');
     process.exit(1);
-  }, 2000); // 2秒后强制退出
-  
-  process.exit(0);
+  }
+});
+
+// 处理未捕获的异常
+process.on('uncaughtException', (err) => {
+  console.error('未捕获的异常:', err);
+  // 记录错误但不退出进程
+});
+
+// 处理未处理的 Promise 拒绝
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('未处理的 Promise 拒绝:', reason);
+  // 记录错误但不退出进程
 });
